@@ -1,0 +1,53 @@
+package controller
+
+import (
+	"context"
+	"net/http"
+
+	"github.com/ydataai/aws-quota-provider/pkg/server"
+	"github.com/ydataai/aws-quota-provider/pkg/service"
+
+	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
+)
+
+// RESTController defines rest controller
+type RESTController struct {
+	log           *logrus.Logger
+	restService   service.RESTServiceInterface
+	configuration RESTControllerConfiguration
+}
+
+// NewRESTController initializes rest controller
+func NewRESTController(
+	log *logrus.Logger,
+	restService service.RESTServiceInterface,
+	configuration RESTControllerConfiguration,
+) RESTController {
+	return RESTController{
+		restService:   restService,
+		log:           log,
+		configuration: configuration,
+	}
+}
+
+// Boot ...
+func (r RESTController) Boot(s *server.Server) {
+	s.Router.GET("/available/gpu", r.getAvailableGPU())
+}
+
+func (r RESTController) getAvailableGPU() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		tCtx, cancel := context.WithTimeout(ctx, r.configuration.timeout)
+		defer cancel()
+
+		gpu, err := r.restService.AvailableGPU(tCtx)
+		if err != nil {
+			r.log.Errorf("while fetching available resources. Error: %s", err.Error())
+			ctx.JSON(http.StatusInternalServerError, err)
+			return
+		}
+
+		ctx.JSON(http.StatusOK, gpu)
+	}
+}
