@@ -5,7 +5,7 @@ on:
     types: [ prereleased ]
 
 env:
-  COMPONENT: aws-quota-provider
+  COMPONENT: aws/quota-provider
   CONTAINER: ${{ secrets.DEPLOYMENT_CONTAINER }}
   DEPLOYMENT_NAME: ${{ secrets.DEPLOYMENT_NAME }}
 
