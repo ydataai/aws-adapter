@@ -51,28 +51,6 @@ jobs:
         secrets: |
           GIT_AUTH_TOKEN=${{ secrets.GHCR_TOKEN }}
 
-
-  deploy:
-    name: Deploy
-    runs-on: ubuntu-20.04
-
-    needs: build
-
-    steps:
-    - name: Setup gcloud environment
-      uses: google-github-actions/setup-gcloud@master
-      with:
-        version: ${{ env.GCLOUD_SDK_VERSION }}
-        project_id: ${{ env.PROJECT }}
-        service_account_key: ${{ secrets.GCP_SA_KEY }}
-        export_default_credentials: true
-
-    - name: Deploy to development cluster
-      run: |
-        gcloud container clusters get-credentials ${{ env.CLUSTER }} --zone ${{ env.ZONE }}
-        kubectl -n ydata set image deployment ${DEPLOYMENT_NAME} ${CONTAINER}=${DOCKER_IMAGE_URL}:${{ needs.build.outputs.version }}
-
-
   update-manifests:
     name: Update Manifests
     runs-on: ubuntu-20.04
