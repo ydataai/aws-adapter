@@ -76,7 +76,7 @@ jobs:
         VERSION: ${{ needs.prepare.outputs.version }}
       run: |
         cd ydata/${COMPONENT}
-        kustomize edit set image ${{ secrets.KUSTOMIZE_CONTAINER_IMAGE }}=${DOCKER_IMAGE_URL}:${VERSION}
+        kustomize edit set image ${{ secrets.KUSTOMIZE_PROVIDER_CONTAINER_IMAGE }}=${DOCKER_IMAGE_URL}:${VERSION}
 
     - name: Commit and push image update into manifests repo
       env:
