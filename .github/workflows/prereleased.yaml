@@ -1,0 +1,85 @@
+name: Prereleased
+
+on:
+  release:
+    types: [ prereleased ]
+
+env:
+  COMPONENT: aws/quota-provider
+  CONTAINER: ${{ secrets.DEPLOYMENT_CONTAINER }}
+  DEPLOYMENT_NAME: ${{ secrets.DEPLOYMENT_NAME }}
+
+  GCLOUD_SDK_VERSION: '290.0.1'
+
+  CLUSTER: ${{ secrets.GOOGLE_CLUSTER_DEV }}
+  DOCKER_CONTAINER_REGISTRY: ${{ secrets.PRIVATE_CONTAINER_REGISTRY }}
+  DOCKER_IMAGE_URL: ${{ secrets.PRIVATE_CONTAINER_REGISTRY }}/${{ github.repository_owner }}/aws-quota-provider
+  PROJECT: ${{ secrets.GOOGLE_PROJECT_ID_DEV }}
+  ZONE: ${{ secrets.GOOGLE_CLUSTER_DEV_ZONE }}
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-20.04
+
+    outputs:
+      version: ${{ steps.version.outputs.value }}
+
+    steps:
+    - name: Version
+      id: version
+      run: echo ::set-output name=value::`echo ${{ github.ref }} | sed -n -E 's/refs\/tags\/build\/([0-9]+.[0-9]+.[0-9]+)\/([[:alnum:]])/\1.\2/p'`
+
+    - uses: actions/checkout@v2
+
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v1
+      with:
+        registry: ${{ secrets.PRIVATE_CONTAINER_REGISTRY }}
+        username: ${{ github.repository_owner }}
+        password: ${{ secrets.GHCR_TOKEN }}
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+
+    - name: Build and push
+      id: docker_build
+      uses: docker/build-push-action@v2
+      with:
+        push: true
+        tags: ${{ env.DOCKER_IMAGE_URL }}:${{ steps.version.outputs.value }}
+        secrets: |
+          GIT_AUTH_TOKEN=${{ secrets.GHCR_TOKEN }}
+
+  update-manifests:
+    name: Update Manifests
+    runs-on: ubuntu-20.04
+
+    needs: build
+
+    steps:
+    - name: Checkout Manifests repo
+      uses: actions/checkout@v2
+      with:
+        repository: ydataai/manifests
+        token: ${{ secrets.ACCESS_TOKEN }}
+
+    - uses: imranismail/setup-kustomize@v1
+      with:
+        kustomize-version: "3.8.5"
+
+    - name: Update kustomization image tag
+      env:
+        VERSION: ${{ needs.build.outputs.version }}
+      run: |
+        cd ydata/${COMPONENT}
+        kustomize edit set image ${{ secrets.KUSTOMIZE_PROVIDER_CONTAINER_IMAGE }}=${DOCKER_IMAGE_URL}:${VERSION}
+
+    - name: Commit and push image update into manifests repo
+      env:
+        VERSION: ${{ needs.build.outputs.version }}
+      run: |
+        git config user.email "azory@ydata.ai"
+        git config user.name "Azory YData Bot"
+        git commit -a -m "chore(bump): [CI] [DEV] bump ${{ env.COMPONENT }} to $VERSION"
+        git push origin master
