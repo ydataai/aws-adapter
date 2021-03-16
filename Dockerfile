@@ -13,7 +13,7 @@ COPY . .
 RUN cd /aws-quota-provider && go mod download
 
 # Build
-RUN go build -a -o server cmd/server
+RUN go build -a -o server ./cmd/server
 
 # Use distroless as minimal base image to package the manager binary
 FROM gcr.io/distroless/base:latest-amd64
