@@ -33,7 +33,14 @@ func NewRESTController(
 
 // Boot ...
 func (r RESTController) Boot(s *server.Server) {
+	s.Router.GET("/healthz", r.healthCheck())
 	s.Router.GET("/available/gpu", r.getAvailableGPU())
+}
+
+func (r RESTController) healthCheck() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		ctx.Status(http.StatusNoContent)
+	}
 }
 
 func (r RESTController) getAvailableGPU() gin.HandlerFunc {
@@ -44,7 +51,7 @@ func (r RESTController) getAvailableGPU() gin.HandlerFunc {
 		gpu, err := r.restService.AvailableGPU(tCtx)
 		if err != nil {
 			r.log.Errorf("while fetching available resources. Error: %s", err.Error())
-			ctx.JSON(http.StatusInternalServerError, err)
+			ctx.JSON(http.StatusInternalServerError, err.Error())
 			return
 		}
 
