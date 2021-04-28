@@ -58,7 +58,7 @@ jobs:
     name: Update Manifests
     runs-on: ubuntu-20.04
 
-    needs: prepare
+    needs: [ prepare, docker ]
 
     steps:
     - name: Checkout Manifests repo
@@ -77,6 +77,7 @@ jobs:
       run: |
         cd ydata/${COMPONENT}
         kustomize edit set image ${{ secrets.KUSTOMIZE_PROVIDER_CONTAINER_IMAGE }}=${DOCKER_IMAGE_URL}:${VERSION}
+        kustomize edit add label app.kubernetes.io/version:${VERSION} -f
 
     - name: Commit and push image update into manifests repo
       env:
