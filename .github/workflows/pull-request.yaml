@@ -1,8 +1,11 @@
-name: pull request
+name: Pull request
+
 
 on:
   pull_request:
-    branches: [ master ]
+    branches:
+    - master
+
 
 jobs:
   validate:
@@ -28,10 +31,13 @@ jobs:
           ${{ runner.OS }}-
 
     - name: Run build
-      run: make build
+      run: |
+        make build
 
     - name: Run vet
-      run: make vet
+      run: |
+        make vet
 
     - name: Run tests
-      run: make test
+      run: |
+        make test
