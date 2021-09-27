@@ -25,15 +25,13 @@ jobs:
     steps:
     - name: Version
       id: version
-      run: |
-        echo ::set-output name=value::${GITHUB_REF#refs/*/}
+      run: echo ::set-output name=value::${GITHUB_REF#refs/*/}
 
     - uses: actions/checkout@v2
 
     - name: Git Short sha
       id: short_sha
-      run: |
-        echo "::set-output name=value::$(git rev-parse --short HEAD)"
+      run: echo "::set-output name=value::$(git rev-parse --short HEAD)"
 
 
   docker:

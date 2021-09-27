@@ -32,8 +32,7 @@ jobs:
 
     - name: Git Short sha
       id: short_sha
-      run: |
-        echo "::set-output name=value::$(git rev-parse --short HEAD)"
+      run: echo "::set-output name=value::$(git rev-parse --short HEAD)"
 
 
   build:
@@ -63,8 +62,7 @@ jobs:
           ${{ runner.OS }}-
 
     - name: Build for test
-      run: |
-        make build
+      run: make build
 
 
   dev-release:
