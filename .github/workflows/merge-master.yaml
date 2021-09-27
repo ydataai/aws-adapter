@@ -1,8 +1,11 @@
-name: master
+name: Merge master
+
 
 on:
   push:
-    branches: [ master ]
+    branches:
+    - master
+
 
 jobs:
   prepare:
@@ -68,7 +71,9 @@ jobs:
     name: Dev Release
     runs-on: ubuntu-20.04
 
-    needs: [ prepare, build ]
+    needs:
+    - prepare
+    - build
 
     steps:
     - name: Create Pre Release
@@ -78,7 +83,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
         VERSION: ${{ needs.prepare.outputs.release }}
       with:
-        tag_name: build/${{ env.VERSION }}/${{ env.BUILD }}
+        tag_name: ${{ env.VERSION }}.${{ env.BUILD }}
         release_name: ${{ env.VERSION }}.${{ env.BUILD }}
         body: ${{ github.event.head_commit.message }}
         prerelease: true
@@ -90,7 +95,9 @@ jobs:
     name: Draft Release
     runs-on: ubuntu-20.04
 
-    needs: [ prepare, build ]
+    needs:
+    - prepare
+    - build
 
     steps:
     - name: Delete Previous drafts

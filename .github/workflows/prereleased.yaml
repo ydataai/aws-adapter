@@ -1,21 +1,17 @@
 name: Prereleased
 
+
 on:
   release:
-    types: [ prereleased ]
+    types:
+    - prereleased
+
 
 env:
-  COMPONENT: aws/quota-provider
-  CONTAINER: ${{ secrets.DEPLOYMENT_CONTAINER }}
-  DEPLOYMENT_NAME: ${{ secrets.DEPLOYMENT_NAME }}
-
-  GCLOUD_SDK_VERSION: '290.0.1'
-
-  CLUSTER: ${{ secrets.GOOGLE_CLUSTER_DEV }}
-  DOCKER_CONTAINER_REGISTRY: ${{ secrets.PRIVATE_CONTAINER_REGISTRY }}
+  COMPONENT: aws-quota-provider
+  COMPONENT_PATH: distributions/aws/quota-provider/
   DOCKER_IMAGE_URL: ${{ secrets.PRIVATE_CONTAINER_REGISTRY }}/${{ github.repository_owner }}/aws-quota-provider
-  PROJECT: ${{ secrets.GOOGLE_PROJECT_ID_DEV }}
-  ZONE: ${{ secrets.GOOGLE_CLUSTER_DEV_ZONE }}
+
 
 jobs:
   build:
@@ -28,7 +24,7 @@ jobs:
     steps:
     - name: Version
       id: version
-      run: echo ::set-output name=value::`echo ${{ github.ref }} | sed -n -E 's/refs\/tags\/build\/([0-9]+.[0-9]+.[0-9]+)\/([[:alnum:]])/\1.\2/p'`
+      run: echo ::set-output name=value::${GITHUB_REF#refs/*/}
 
     - uses: actions/checkout@v2
 
@@ -51,11 +47,13 @@ jobs:
         secrets: |
           GIT_AUTH_TOKEN=${{ secrets.GHCR_TOKEN }}
 
+
   update-manifests:
     name: Update Manifests
     runs-on: ubuntu-20.04
 
-    needs: build
+    needs:
+    - build
 
     steps:
     - name: Checkout Manifests repo
@@ -72,7 +70,7 @@ jobs:
       env:
         VERSION: ${{ needs.build.outputs.version }}
       run: |
-        cd ydata/${COMPONENT}
+        cd ${COMPONENT_PATH}
         kustomize edit set image ${{ secrets.KUSTOMIZE_PROVIDER_CONTAINER_IMAGE }}=${DOCKER_IMAGE_URL}:${VERSION}
 
     - name: Commit and push image update into manifests repo
