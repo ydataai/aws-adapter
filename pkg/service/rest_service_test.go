@@ -3,18 +3,29 @@ package service_test
 import (
 	"context"
 	"errors"
+	"fmt"
+	"os"
 	"testing"
 
 	"github.com/golang/mock/gomock"
 	"github.com/google/go-cmp/cmp"
-	"github.com/sirupsen/logrus"
+
 	"github.com/ydataai/aws-quota-provider/mock"
 	"github.com/ydataai/aws-quota-provider/pkg/clients"
 	"github.com/ydataai/aws-quota-provider/pkg/common"
 	"github.com/ydataai/aws-quota-provider/pkg/service"
+	"github.com/ydataai/go-core/pkg/common/logging"
 )
 
 func TestAvailableGPU(t *testing.T) {
+	loggerConfiguration := logging.LoggerConfiguration{}
+	if err := loggerConfiguration.LoadFromEnvVars(); err != nil {
+		fmt.Println(fmt.Errorf("could not set logging configuration. Err: %v", err))
+		os.Exit(1)
+	}
+
+	logger := logging.NewLogger(loggerConfiguration)
+
 	t.Run("failure response", func(t *testing.T) {
 		errM := errors.New("mock error")
 
@@ -69,12 +80,10 @@ func TestAvailableGPU(t *testing.T) {
 
 				ctx := context.Background()
 
-				log := logrus.New()
-
 				restServiceConfiguration := service.RESTServiceConfiguration{}
 
 				restService := service.NewRESTService(
-					log,
+					logger,
 					tc.ec2M(ctx, ctrl),
 					tc.serviceQuotaM(ctx, ctrl),
 					restServiceConfiguration,
@@ -94,7 +103,6 @@ func TestAvailableGPU(t *testing.T) {
 		defer ctrl.Finish()
 
 		ctx := context.Background()
-		log := logrus.New()
 
 		restServiceConfiguration := service.RESTServiceConfiguration{}
 
@@ -107,7 +115,7 @@ func TestAvailableGPU(t *testing.T) {
 			GetAvailableGPUInstances(gomock.Any(), gomock.Any()).Return(common.GPU(4), nil)
 
 		restService := service.NewRESTService(
-			log,
+			logger,
 			ec2M,
 			serviceQuotaM,
 			restServiceConfiguration,

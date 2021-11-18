@@ -4,10 +4,10 @@ import (
 	"log"
 
 	"github.com/ydataai/aws-quota-provider/pkg/common"
+	"github.com/ydataai/go-core/pkg/common/logging"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/servicequotas"
-	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -22,12 +22,12 @@ type ServiceQuotaClientInterface interface {
 
 // ServiceQuotaClient is the service quota client
 type ServiceQuotaClient struct {
-	log          *logrus.Logger
+	log          logging.Logger
 	serviceQuota *servicequotas.ServiceQuotas
 }
 
 // NewServiceQuotaClient initializes service quota
-func NewServiceQuotaClient(log *logrus.Logger, serviceQuota *servicequotas.ServiceQuotas) ServiceQuotaClient {
+func NewServiceQuotaClient(log logging.Logger, serviceQuota *servicequotas.ServiceQuotas) ServiceQuotaClient {
 	return ServiceQuotaClient{
 		log:          log,
 		serviceQuota: serviceQuota,

@@ -5,8 +5,7 @@ import (
 
 	"github.com/ydataai/aws-quota-provider/pkg/clients"
 	"github.com/ydataai/aws-quota-provider/pkg/common"
-
-	"github.com/sirupsen/logrus"
+	"github.com/ydataai/go-core/pkg/common/logging"
 )
 
 // RESTServiceInterface defines rest service interface
@@ -16,7 +15,7 @@ type RESTServiceInterface interface {
 
 // RESTService defines a struct with required dependencies for rest service
 type RESTService struct {
-	log                *logrus.Logger
+	log                logging.Logger
 	ec2Client          clients.EC2ClientInterface
 	serviceQuotaClient clients.ServiceQuotaClientInterface
 	configuration      RESTServiceConfiguration
@@ -24,7 +23,7 @@ type RESTService struct {
 
 // NewRESTService initializes rest service
 func NewRESTService(
-	log *logrus.Logger,
+	log logging.Logger,
 	ec2Client clients.EC2ClientInterface,
 	serviceQuotaClient clients.ServiceQuotaClientInterface,
 	configuration RESTServiceConfiguration,
@@ -41,15 +40,15 @@ func NewRESTService(
 func (rs RESTService) AvailableGPU(ctx context.Context) (common.GPU, error) {
 	rs.log.Info("Starting to featch available GPU")
 
-	gpuInstances, err := rs.ec2Client.GetGPUInstances(rs.configuration.gpuInstanceType)
+	gpuInstances, err := rs.ec2Client.GetGPUInstances(rs.configuration.GPUInstanceType)
 	if err != nil {
 		rs.log.Infof("while fetching gpu instances. Error: %v", gpuInstances)
 		return common.GPU(0), err
 	}
 
 	availableGPUInstances, err := rs.serviceQuotaClient.GetAvailableGPUInstances(
-		rs.configuration.gpuInstanceType,
-		rs.configuration.gpuCodeServiceCode,
+		rs.configuration.GPUInstanceType,
+		rs.configuration.GPUQuotaServiceCode,
 	)
 	if err != nil {
 		rs.log.Infof("while fetching available gpu instances. Error: %v", availableGPUInstances)

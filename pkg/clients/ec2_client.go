@@ -2,10 +2,10 @@ package clients
 
 import (
 	"github.com/ydataai/aws-quota-provider/pkg/common"
+	"github.com/ydataai/go-core/pkg/common/logging"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/sirupsen/logrus"
 )
 
 // EC2ClientInterface defines a interface for ec2 client
@@ -15,12 +15,12 @@ type EC2ClientInterface interface {
 
 // EC2Client is the ec2 client
 type EC2Client struct {
-	log *logrus.Logger
+	log logging.Logger
 	ec2 *ec2.EC2
 }
 
 // NewEC2Client initializes ec2 client
-func NewEC2Client(log *logrus.Logger, ec2 *ec2.EC2) EC2Client {
+func NewEC2Client(log logging.Logger, ec2 *ec2.EC2) EC2Client {
 	return EC2Client{
 		log: log,
 		ec2: ec2,
