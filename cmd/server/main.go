@@ -5,70 +5,64 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/ydataai/go-core/pkg/common/config"
+	"github.com/ydataai/go-core/pkg/common/logging"
+	"github.com/ydataai/go-core/pkg/common/server"
+
 	"github.com/ydataai/aws-quota-provider/pkg/clients"
-	"github.com/ydataai/aws-quota-provider/pkg/common"
 	"github.com/ydataai/aws-quota-provider/pkg/controller"
-	"github.com/ydataai/aws-quota-provider/pkg/server"
 	"github.com/ydataai/aws-quota-provider/pkg/service"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/servicequotas"
-	"github.com/sirupsen/logrus"
+)
+
+var (
+	errChan chan error
 )
 
 func main() {
 	restServiceConfiguration := service.RESTServiceConfiguration{}
-	serverConfiguration := server.Configuration{}
-	restControllerConfiguration := controller.RESTControllerConfiguration{}
-	applicationConfiguration := configuration{}
+	serverConfiguration := server.HTTPServerConfiguration{}
+	restControllerConfiguration := config.RESTControllerConfiguration{}
+	applicationConfiguration := Configuration{}
+	loggerConfiguration := logging.LoggerConfiguration{}
 
-	err := initConfigurationurationVariables([]common.ConfigurationVariables{
+	if err := config.InitConfigurationVariables([]config.ConfigurationVariables{
 		&restServiceConfiguration,
 		&serverConfiguration,
 		&restControllerConfiguration,
 		&applicationConfiguration,
-	})
-	if err != nil {
+	}); err != nil {
 		fmt.Println(fmt.Errorf("could not set configuration variables. Err: %v", err))
 		os.Exit(1)
 	}
 
-	var log = logrus.New()
-	log.SetLevel(applicationConfiguration.logLevel)
+	logger := logging.NewLogger(loggerConfiguration)
 
 	sess := session.Must(session.NewSession(&aws.Config{
-		Region: aws.String(applicationConfiguration.awsRegion),
+		Region: aws.String(applicationConfiguration.AWSRegion),
 	}))
 
 	ec2Service := ec2.New(sess)
 	serviceQuotaService := servicequotas.New(sess)
 
-	ec2Client := clients.NewEC2Client(log, ec2Service)
-	serviceQuotaClient := clients.NewServiceQuotaClient(log, serviceQuotaService)
+	ec2Client := clients.NewEC2Client(logger, ec2Service)
+	serviceQuotaClient := clients.NewServiceQuotaClient(logger, serviceQuotaService)
 
-	restService := service.NewRESTService(log, ec2Client, serviceQuotaClient, restServiceConfiguration)
-	restController := controller.NewRESTController(log, restService, restControllerConfiguration)
+	restService := service.NewRESTService(logger, ec2Client, serviceQuotaClient, restServiceConfiguration)
+	restController := controller.NewRESTController(logger, restService, restControllerConfiguration)
 
 	serverCtx := context.Background()
 
-	s := server.NewServer(log, serverConfiguration)
-	restController.Boot(s)
+	httpServer := server.NewServer(logger, serverConfiguration)
+	restController.Boot(httpServer)
 
-	s.Run(serverCtx)
+	httpServer.Run(serverCtx)
 
-	for err := range s.ErrCh {
-		log.Error(err)
+	for err := range errChan {
+		logger.Error(err)
 	}
-
-}
-func initConfigurationurationVariables(configurations []common.ConfigurationVariables) error {
-	for _, configuration := range configurations {
-		if err := configuration.LoadEnvVars(); err != nil {
-			return err
-		}
-	}
-
-	return nil
 }

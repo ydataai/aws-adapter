@@ -4,25 +4,26 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/ydataai/aws-quota-provider/pkg/server"
 	"github.com/ydataai/aws-quota-provider/pkg/service"
+	"github.com/ydataai/go-core/pkg/common/config"
+	"github.com/ydataai/go-core/pkg/common/logging"
+	"github.com/ydataai/go-core/pkg/common/server"
 
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 )
 
 // RESTController defines rest controller
 type RESTController struct {
-	log           *logrus.Logger
+	log           logging.Logger
 	restService   service.RESTServiceInterface
-	configuration RESTControllerConfiguration
+	configuration config.RESTControllerConfiguration
 }
 
 // NewRESTController initializes rest controller
 func NewRESTController(
-	log *logrus.Logger,
+	log logging.Logger,
 	restService service.RESTServiceInterface,
-	configuration RESTControllerConfiguration,
+	configuration config.RESTControllerConfiguration,
 ) RESTController {
 	return RESTController{
 		restService:   restService,
@@ -45,7 +46,7 @@ func (r RESTController) healthCheck() gin.HandlerFunc {
 
 func (r RESTController) getAvailableGPU() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		tCtx, cancel := context.WithTimeout(ctx, r.configuration.timeout)
+		tCtx, cancel := context.WithTimeout(ctx, r.configuration.HTTPRequestTimeout)
 		defer cancel()
 
 		gpu, err := r.restService.AvailableGPU(tCtx)
