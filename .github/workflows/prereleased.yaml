@@ -1,22 +1,46 @@
 name: Prereleased
 
 
+
 on:
   release:
     types:
     - prereleased
 
 
+
 env:
   COMPONENT: aws-quota-provider
-  COMPONENT_PATH: distributions/aws/quota-provider/
-  DOCKER_IMAGE_URL: ${{ secrets.PRIVATE_CONTAINER_REGISTRY }}/${{ github.repository_owner }}/aws-quota-provider
+  COMPONENT_PATH: distributions/aws/
+
+  PRIVATE_ECR_ACCESSKEYID: ${{ secrets.AWS_ECR_ACCESSKEYID }}
+  PRIVATE_ECR_SECRETACCESSKEY: ${{ secrets.AWS_ECR_SECRETACCESSKEY }}
+  PRIVATE_ECR_REGION: ${{ secrets.AWS_ECR_REGION }}
+
+  DOCKER_REPOSITORY: aws-quota-provider
+  CONTAINER: aws-quota-provider-container-image
+
 
 
 jobs:
-  build:
-    name: Build
+  cancel_previous:
+    name: 'Cancel Previous Runs'
     runs-on: ubuntu-20.04
+    timeout-minutes: 3
+
+    steps:
+      - uses: ydataai/cancel-workflow-action@0.7.0-fix
+        with:
+          ignore_sha: true
+          access_token: ${{ secrets.ACCESS_TOKEN }}
+
+
+  prepare:
+    name: Prepare
+    runs-on: ubuntu-20.04
+
+    needs:
+    - cancel_previous
 
     outputs:
       version: ${{ steps.version.outputs.value }}
@@ -26,26 +50,37 @@ jobs:
       id: version
       run: echo ::set-output name=value::${GITHUB_REF#refs/*/}
 
+
+  build:
+    name: Build
+    runs-on: ubuntu-20.04
+
+    needs:
+    - prepare
+
+    steps:
     - uses: actions/checkout@v2
 
-    - name: Login to GitHub Container Registry
-      uses: docker/login-action@v1
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
       with:
-        registry: ${{ secrets.PRIVATE_CONTAINER_REGISTRY }}
-        username: ${{ github.repository_owner }}
-        password: ${{ secrets.GHCR_TOKEN }}
+        aws-access-key-id: ${{ env.PRIVATE_ECR_ACCESSKEYID }}
+        aws-secret-access-key: ${{ env.PRIVATE_ECR_SECRETACCESSKEY }}
+        aws-region: ${{ env.PRIVATE_ECR_REGION }}
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v1
+    - name: Login to Amazon ECR
+      id: ecr_password
+      uses: aws-actions/amazon-ecr-login@v1
 
     - name: Build and push
       id: docker_build
       uses: docker/build-push-action@v2
+      env:
+        DOCKER_IMAGE_TAG: ${{ steps.ecr_password.outputs.registry }}/${{ env.DOCKER_REPOSITORY }}:${{ needs.prepare.outputs.version }}
       with:
+        context: .
         push: true
-        tags: ${{ env.DOCKER_IMAGE_URL }}:${{ steps.version.outputs.value }}
-        secrets: |
-          GIT_AUTH_TOKEN=${{ secrets.GHCR_TOKEN }}
+        tags: ${{ env.DOCKER_IMAGE_TAG }}
 
 
   update-manifests:
@@ -53,6 +88,7 @@ jobs:
     runs-on: ubuntu-20.04
 
     needs:
+    - prepare
     - build
 
     steps:
@@ -68,14 +104,14 @@ jobs:
 
     - name: Update kustomization image tag
       env:
-        VERSION: ${{ needs.build.outputs.version }}
+        VERSION: ${{ needs.prepare.outputs.version }}
       run: |
         cd ${COMPONENT_PATH}
-        kustomize edit set image ${{ secrets.KUSTOMIZE_PROVIDER_CONTAINER_IMAGE }}=${DOCKER_IMAGE_URL}:${VERSION}
+        kustomize edit set image ${CONTAINER}=${DOCKER_REPOSITORY}:${VERSION}
 
     - name: Commit and push image update into manifests repo
       env:
-        VERSION: ${{ needs.build.outputs.version }}
+        VERSION: ${{ needs.prepare.outputs.version }}
       run: |
         git config user.email "azory@ydata.ai"
         git config user.name "Azory YData Bot"
