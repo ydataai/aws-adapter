@@ -54,7 +54,6 @@ func (s awsMeteringService) CreateUsageEvent(ctx context.Context, req cloud.Usag
 }
 
 func (s awsMeteringService) CreateUsageEventBatch(ctx context.Context, req cloud.UsageEventBatchReq) (cloud.UsageEventBatchRes, error) {
-	quantity := int64(1)
 	customer, err := s.marketplace.ResolveCustomerWithContext(ctx, &marketplacemetering.ResolveCustomerInput{
 		RegistrationToken: &s.config.RegistrationToken,
 	})
@@ -75,7 +74,7 @@ func (s awsMeteringService) CreateUsageEventBatch(ctx context.Context, req cloud
 			Timestamp:          &event.StartAt,
 			UsageAllocations: []*marketplacemetering.UsageAllocation{
 				{
-					AllocatedUsageQuantity: &quantity,
+					AllocatedUsageQuantity: qty,
 					Tags:                   []*marketplacemetering.Tag{},
 				},
 			},
