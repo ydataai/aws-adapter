@@ -1,4 +1,4 @@
-ARG GOLANG_VERSION=1.15
+ARG GOLANG_VERSION=1.18
 FROM golang:${GOLANG_VERSION} as builder
 
 WORKDIR /aws-quota-provider
