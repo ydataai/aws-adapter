@@ -13,7 +13,7 @@ COPY . .
 RUN cd /aws-quota-provider && go mod download
 
 # Build
-RUN go build -a -o server ./cmd/server
+RUN go build -a -o quota ./cmd/quota
 
 # Use distroless as minimal base image to package the manager binary
 FROM gcr.io/distroless/base:latest-amd64
@@ -21,6 +21,6 @@ WORKDIR /
 
 LABEL org.opencontainers.image.source https://github.com/ydataai/aws-quota-provider
 
-COPY --from=builder /aws-quota-provider/server .
+COPY --from=builder /aws-quota-provider/quota .
 
-ENTRYPOINT ["/server"]
+ENTRYPOINT ["/quota"]

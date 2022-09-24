@@ -3,8 +3,8 @@ package service
 import (
 	"context"
 
-	"github.com/ydataai/aws-quota-provider/pkg/clients"
-	"github.com/ydataai/aws-quota-provider/pkg/common"
+	"github.com/ydataai/aws-adapter/pkg/clients"
+	"github.com/ydataai/aws-adapter/pkg/common"
 	"github.com/ydataai/go-core/pkg/common/logging"
 )
 
