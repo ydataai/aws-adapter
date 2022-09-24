@@ -9,9 +9,9 @@ import (
 	"github.com/ydataai/go-core/pkg/common/logging"
 	"github.com/ydataai/go-core/pkg/common/server"
 
-	"github.com/ydataai/aws-quota-provider/pkg/clients"
-	"github.com/ydataai/aws-quota-provider/pkg/controller"
-	"github.com/ydataai/aws-quota-provider/pkg/service"
+	"github.com/ydataai/aws-adapter/pkg/clients"
+	"github.com/ydataai/aws-adapter/pkg/controller"
+	"github.com/ydataai/aws-adapter/pkg/service"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"

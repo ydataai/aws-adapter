@@ -1,4 +1,4 @@
-module github.com/ydataai/aws-quota-provider
+module github.com/ydataai/aws-adapter
 
 go 1.18
 

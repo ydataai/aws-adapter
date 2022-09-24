@@ -3,7 +3,7 @@ package clients
 import (
 	"log"
 
-	"github.com/ydataai/aws-quota-provider/pkg/common"
+	"github.com/ydataai/aws-adapter/pkg/common"
 	"github.com/ydataai/go-core/pkg/common/logging"
 
 	"github.com/aws/aws-sdk-go/aws"

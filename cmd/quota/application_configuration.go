@@ -9,7 +9,7 @@ type Configuration struct {
 	AWSRegion string `envconfig:"REGION" required:"true"`
 }
 
-// LoadEnvVars reads all env vars required for the server package
+// LoadEnvVars reads all env vars required for the quota package
 func (c *Configuration) LoadFromEnvVars() error {
 	return envconfig.Process("", c)
 }

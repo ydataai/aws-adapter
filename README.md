@@ -1,2 +1,2 @@
-# aws-quota-provider
-AWS Quota Provider
+# aws-adapter
+Adapter Layer for AWS services 

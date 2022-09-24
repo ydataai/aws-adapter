@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/ydataai/aws-quota-provider/pkg/service"
+	"github.com/ydataai/aws-adapter/pkg/service"
 	"github.com/ydataai/go-core/pkg/common/config"
 	"github.com/ydataai/go-core/pkg/common/logging"
 	"github.com/ydataai/go-core/pkg/common/server"

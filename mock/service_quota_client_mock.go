@@ -8,7 +8,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	common "github.com/ydataai/aws-quota-provider/pkg/common"
+	common "github.com/ydataai/aws-adapter/pkg/common"
 )
 
 // MockServiceQuotaClientInterface is a mock of ServiceQuotaClientInterface interface.

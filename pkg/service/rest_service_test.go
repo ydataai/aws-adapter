@@ -10,10 +10,10 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/google/go-cmp/cmp"
 
-	"github.com/ydataai/aws-quota-provider/mock"
-	"github.com/ydataai/aws-quota-provider/pkg/clients"
-	"github.com/ydataai/aws-quota-provider/pkg/common"
-	"github.com/ydataai/aws-quota-provider/pkg/service"
+	"github.com/ydataai/aws-adapter/mock"
+	"github.com/ydataai/aws-adapter/pkg/clients"
+	"github.com/ydataai/aws-adapter/pkg/common"
+	"github.com/ydataai/aws-adapter/pkg/service"
 	"github.com/ydataai/go-core/pkg/common/logging"
 )
 
