@@ -23,19 +23,13 @@ func NewMarketplaceMetering(config AWSMarketplaceConfiguration, marketplace *mar
 }
 
 func (s awsMeteringService) CreateUsageEvent(ctx context.Context, req cloud.UsageEventReq) (cloud.UsageEventRes, error) {
-	customer, err := s.marketplace.ResolveCustomerWithContext(ctx, &marketplacemetering.ResolveCustomerInput{
-		RegistrationToken: &s.config.RegistrationToken,
-	})
-	if err != nil {
-		return cloud.UsageEventRes{}, err
-	}
 	// event
 	qty, err := s.convert(req.Quantity)
 	if err != nil {
 		return cloud.UsageEventRes{}, err
 	}
 	event := &marketplacemetering.MeterUsageInput{
-		ProductCode:    customer.ProductCode,
+		ProductCode:    &s.config.ProductCode,
 		UsageDimension: &req.DimensionID,
 		UsageQuantity:  qty,
 		Timestamp:      &req.StartAt,
@@ -54,50 +48,23 @@ func (s awsMeteringService) CreateUsageEvent(ctx context.Context, req cloud.Usag
 }
 
 func (s awsMeteringService) CreateUsageEventBatch(ctx context.Context, req cloud.UsageEventBatchReq) (cloud.UsageEventBatchRes, error) {
-	customer, err := s.marketplace.ResolveCustomerWithContext(ctx, &marketplacemetering.ResolveCustomerInput{
-		RegistrationToken: &s.config.RegistrationToken,
-	})
-	if err != nil {
-		return cloud.UsageEventBatchRes{}, err
-	}
-	// events
-	events := []*marketplacemetering.UsageRecord{}
+	output := []cloud.UsageEventRes{}
 	for _, event := range req.Request {
-		qty, err := s.convert(event.Quantity)
+		// events
+		req := cloud.UsageEventReq{
+			DimensionID: event.DimensionID,
+			Quantity:    event.Quantity,
+			StartAt:     event.StartAt,
+		}
+		// send
+		res, err := s.CreateUsageEvent(ctx, req)
 		if err != nil {
 			return cloud.UsageEventBatchRes{}, err
 		}
-		events = append(events, &marketplacemetering.UsageRecord{
-			CustomerIdentifier: customer.CustomerIdentifier,
-			Dimension:          &event.DimensionID,
-			Quantity:           qty,
-			Timestamp:          &event.StartAt,
-			UsageAllocations: []*marketplacemetering.UsageAllocation{
-				{
-					AllocatedUsageQuantity: qty,
-					Tags:                   []*marketplacemetering.Tag{},
-				},
-			},
-		})
-	}
-	// send
-	output, err := s.marketplace.BatchMeterUsageWithContext(ctx, &marketplacemetering.BatchMeterUsageInput{
-		ProductCode:  customer.ProductCode,
-		UsageRecords: events,
-	})
-	if err != nil {
-		return cloud.UsageEventBatchRes{}, err
+		output = append(output, res)
 	}
 	// result
-	results := []cloud.UsageEventRes{}
-	for _, result := range output.Results {
-		results = append(results, cloud.UsageEventRes{
-			UsageEventID: *result.MeteringRecordId,
-			DimensionID:  *result.UsageRecord.Dimension,
-			Status:       result.String(),
-		})
-	}
-	return cloud.UsageEventBatchRes{Result: results}, nil
+	return cloud.UsageEventBatchRes{Result: output}, nil
 }
 
 // convert

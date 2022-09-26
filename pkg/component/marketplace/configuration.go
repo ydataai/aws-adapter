@@ -4,7 +4,8 @@ import "github.com/kelseyhightower/envconfig"
 
 // AWSMarketplaceConfiguration represents the configuration for marketplace client.
 type AWSMarketplaceConfiguration struct {
-	RegistrationToken string `envconfig:"AWS_CUSTOMER_REGISTRATIO_TOKEN" required:"true"`
+	ProductCode string `envconfig:"AWS_PRODUCT_CODE" required:"true"`
+	Region      string `envconfig:"AWS_REGION" required:"true"`
 }
 
 // LoadFromEnvVars reads all env vars required for the marketplace client.
