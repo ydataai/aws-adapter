@@ -22,11 +22,10 @@ func NewMarketplaceMetering(config AWSMarketplaceConfiguration, marketplace *mar
 
 func (s awsMeteringService) CreateUsageEvent(ctx context.Context, req cloud.UsageEventReq) (cloud.UsageEventRes, error) {
 	// event
-	qty := s.round(req.Quantity)
 	event := &marketplacemetering.MeterUsageInput{
 		ProductCode:    &s.config.ProductCode,
 		UsageDimension: &req.DimensionID,
-		UsageQuantity:  qty,
+		UsageQuantity:  s.round(req.Quantity),
 		Timestamp:      &req.StartAt,
 	}
 	// send
@@ -45,7 +44,6 @@ func (s awsMeteringService) CreateUsageEvent(ctx context.Context, req cloud.Usag
 func (s awsMeteringService) CreateUsageEventBatch(ctx context.Context, req cloud.UsageEventBatchReq) (cloud.UsageEventBatchRes, error) {
 	output := []cloud.UsageEventRes{}
 	for _, event := range req.Request {
-		qty := s.round(event.Quantity)
 		// events
 		req := cloud.UsageEventReq{
 			DimensionID: event.DimensionID,
