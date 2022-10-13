@@ -2,9 +2,7 @@ package marketplace
 
 import (
 	"context"
-	"fmt"
-	"strconv"
-	"strings"
+	"math"
 
 	"github.com/aws/aws-sdk-go/service/marketplacemetering"
 	"github.com/ydataai/go-core/pkg/services/cloud"
@@ -24,14 +22,10 @@ func NewMarketplaceMetering(config AWSMarketplaceConfiguration, marketplace *mar
 
 func (s awsMeteringService) CreateUsageEvent(ctx context.Context, req cloud.UsageEventReq) (cloud.UsageEventRes, error) {
 	// event
-	qty, err := s.convert(req.Quantity)
-	if err != nil {
-		return cloud.UsageEventRes{}, err
-	}
 	event := &marketplacemetering.MeterUsageInput{
 		ProductCode:    &s.config.ProductCode,
 		UsageDimension: &req.DimensionID,
-		UsageQuantity:  qty,
+		UsageQuantity:  s.round(req.Quantity),
 		Timestamp:      &req.StartAt,
 	}
 	// send
@@ -67,14 +61,9 @@ func (s awsMeteringService) CreateUsageEventBatch(ctx context.Context, req cloud
 	return cloud.UsageEventBatchRes{Result: output}, nil
 }
 
-// convert
-// %f = 6 decimal places
-// remove decimal point = quantity * 1000000
-func (s awsMeteringService) convert(quantity float32) (*int64, error) {
-	qntstr := strings.Replace(fmt.Sprintf("%f", quantity), ".", "", 1)
-	qnt, err := strconv.ParseInt(qntstr, 10, 64)
-	if err != nil {
-		return nil, err
-	}
-	return &qnt, nil
+// round
+// returns the nearest integer, rounding half away from zero.
+func (s awsMeteringService) round(quantity float32) *int64 {
+	rounded := int64(math.Round(float64(quantity)))
+	return &rounded
 }
