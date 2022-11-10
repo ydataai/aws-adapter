@@ -51,7 +51,7 @@ jobs:
       id: version
       run: echo ::set-output name=value::${GITHUB_REF#refs/*/}
 
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Git Short sha
       id: short_sha
@@ -97,12 +97,12 @@ jobs:
 
     steps:
     - name: Checkout Manifests repo
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         repository: ydataai/manifests
         token: ${{ secrets.ACCESS_TOKEN }}
 
-    - uses: imranismail/setup-kustomize@v1
+    - uses: imranismail/setup-kustomize@v2
       with:
         kustomize-version: "3.8.5"
 
