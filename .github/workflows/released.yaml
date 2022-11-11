@@ -10,15 +10,15 @@ on:
 
 
 env:
-  COMPONENT: aws-quota-provider
+  COMPONENT: aws-adapter
   COMPONENT_PATH: distributions/aws/
 
   PRIVATE_ECR_ACCESSKEYID: ${{ secrets.AWS_ECR_ACCESSKEYID }}
   PRIVATE_ECR_SECRETACCESSKEY: ${{ secrets.AWS_ECR_SECRETACCESSKEY }}
   PRIVATE_ECR_REGION: ${{ secrets.AWS_ECR_REGION }}
 
-  DOCKER_REPOSITORY: aws-quota-provider
-  CONTAINER: aws-quota-provider-container-image
+  DOCKER_REPOSITORY: aws-adapter
+  CONTAINER: aws-adapter-container-image
 
 
 
