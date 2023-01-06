@@ -15,7 +15,9 @@ on:
 jobs:
   validate:
     name: Validate
-    runs-on: self-hosted
+    runs-on:
+    - self-hosted
+    - medium
 
     steps:
     - uses: actions/checkout@v3
