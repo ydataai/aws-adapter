@@ -66,7 +66,7 @@ jobs:
     name: Docker Tag and Push
     runs-on:
     - self-hosted
-    - micro
+    - medium
 
     needs:
     - prepare
