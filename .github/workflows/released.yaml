@@ -21,6 +21,13 @@ env:
 
 
 
+permissions:
+  id-token: write
+  contents: read
+  packages: read
+
+
+
 jobs:
   cancel_previous:
     name: 'Cancel Previous Runs'
