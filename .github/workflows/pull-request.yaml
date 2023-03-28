@@ -29,9 +29,7 @@ permissions:
 jobs:
   validate:
     name: Validate
-    runs-on:
-    - self-hosted
-    - medium
+    runs-on: ubuntu-22.04
 
     steps:
     - uses: actions/checkout@v3
@@ -63,9 +61,7 @@ jobs:
 
   static-analysis:
     name: Static Analysis
-    runs-on:
-    - self-hosted
-    - large
+    runs-on: ubuntu-22.04
 
     steps:
     - uses: actions/checkout@v3
