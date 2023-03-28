@@ -15,7 +15,7 @@ type awsMeteringService struct {
 
 func NewMarketplaceMetering(
 	config AWSMarketplaceConfiguration, marketplace *marketplacemetering.MarketplaceMetering,
-) metering.MeteringClient {
+) metering.Client {
 	return awsMeteringService{
 		config:      config,
 		marketplace: marketplace,
