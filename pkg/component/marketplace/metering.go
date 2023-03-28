@@ -5,7 +5,7 @@ import (
 	"math"
 
 	"github.com/aws/aws-sdk-go/service/marketplacemetering"
-	"github.com/ydataai/go-core/pkg/services/cloud"
+	"github.com/ydataai/go-core/pkg/metering"
 )
 
 type awsMeteringService struct {
@@ -13,14 +13,18 @@ type awsMeteringService struct {
 	marketplace *marketplacemetering.MarketplaceMetering
 }
 
-func NewMarketplaceMetering(config AWSMarketplaceConfiguration, marketplace *marketplacemetering.MarketplaceMetering) cloud.MeteringService {
+func NewMarketplaceMetering(
+	config AWSMarketplaceConfiguration, marketplace *marketplacemetering.MarketplaceMetering,
+) metering.MeteringClient {
 	return awsMeteringService{
 		config:      config,
 		marketplace: marketplace,
 	}
 }
 
-func (s awsMeteringService) CreateUsageEvent(ctx context.Context, req cloud.UsageEventReq) (cloud.UsageEventRes, error) {
+func (s awsMeteringService) CreateUsageEvent(
+	ctx context.Context, req metering.UsageEvent,
+) (metering.UsageEventResponse, error) {
 	// event
 	event := &marketplacemetering.MeterUsageInput{
 		ProductCode:    &s.config.ProductCode,
@@ -31,21 +35,23 @@ func (s awsMeteringService) CreateUsageEvent(ctx context.Context, req cloud.Usag
 	// send
 	output, err := s.marketplace.MeterUsageWithContext(ctx, event)
 	if err != nil {
-		return cloud.UsageEventRes{}, err
+		return metering.UsageEventResponse{}, err
 	}
 	// result
-	return cloud.UsageEventRes{
+	return metering.UsageEventResponse{
 		UsageEventID: *output.MeteringRecordId,
 		DimensionID:  req.DimensionID,
 		Status:       output.String(),
 	}, nil
 }
 
-func (s awsMeteringService) CreateUsageEventBatch(ctx context.Context, req cloud.UsageEventBatchReq) (cloud.UsageEventBatchRes, error) {
-	output := []cloud.UsageEventRes{}
-	for _, event := range req.Request {
+func (s awsMeteringService) CreateUsageEventBatch(
+	ctx context.Context, req metering.UsageEventBatch,
+) (metering.UsageEventBatchResponse, error) {
+	output := []metering.UsageEventResponse{}
+	for _, event := range req.Events {
 		// events
-		req := cloud.UsageEventReq{
+		req := metering.UsageEvent{
 			DimensionID: event.DimensionID,
 			Quantity:    event.Quantity,
 			StartAt:     event.StartAt,
@@ -53,12 +59,12 @@ func (s awsMeteringService) CreateUsageEventBatch(ctx context.Context, req cloud
 		// send
 		res, err := s.CreateUsageEvent(ctx, req)
 		if err != nil {
-			return cloud.UsageEventBatchRes{}, err
+			return metering.UsageEventBatchResponse{}, err
 		}
 		output = append(output, res)
 	}
 	// result
-	return cloud.UsageEventBatchRes{Result: output}, nil
+	return metering.UsageEventBatchResponse{Result: output}, nil
 }
 
 // round
