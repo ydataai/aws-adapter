@@ -1,26 +1,21 @@
-ARG GOLANG_VERSION=1.18
+ARG GOLANG_VERSION=1.20
 FROM golang:${GOLANG_VERSION} as builder
 
-WORKDIR /aws-quota-provider
-
-ENV GO111MODULE=on
-ENV CGO_ENABLED=0
-ENV GOOS=linux
-ENV GOARCH=amd64
+WORKDIR /workspace
 
 COPY . .
 
-RUN cd /aws-quota-provider && go mod download
+RUN go mod download
 
 # Build
-RUN go build -a -o quota ./cmd/quota
+RUN CGO_ENABLED=0 go build -a -o main ./cmd/quota
 
 # Use distroless as minimal base image to package the manager binary
 FROM gcr.io/distroless/base:latest-amd64
 WORKDIR /
 
-LABEL org.opencontainers.image.source https://github.com/ydataai/aws-quota-provider
+LABEL org.opencontainers.image.source https://github.com/ydataai/aws-adapter
 
-COPY --from=builder /aws-quota-provider/quota .
+COPY --from=builder /workspace/main .
 
-ENTRYPOINT ["/quota"]
+ENTRYPOINT ["/main"]

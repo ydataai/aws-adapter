@@ -58,8 +58,9 @@ func main() {
 	serverCtx := context.Background()
 
 	httpServer := server.NewServer(logger, serverConfiguration)
+	httpServer.AddHealthz()
+	httpServer.AddReadyz(nil)
 	restController.Boot(httpServer)
-
 	httpServer.Run(serverCtx)
 
 	for err := range errChan {

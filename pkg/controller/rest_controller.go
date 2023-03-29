@@ -33,9 +33,9 @@ func NewRESTController(
 }
 
 // Boot ...
-func (r RESTController) Boot(s *server.Server) {
-	s.Router.GET("/healthz", r.healthCheck())
-	s.Router.GET("/available/gpu", r.getAvailableGPU())
+func (r RESTController) Boot(s server.Server) {
+	s.Router().GET("/healthz", r.healthCheck())
+	s.Router().GET("/available/gpu", r.getAvailableGPU())
 }
 
 func (r RESTController) healthCheck() gin.HandlerFunc {
