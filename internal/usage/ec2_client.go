@@ -1,34 +1,33 @@
-package clients
+// Package usage offers objects and methods to help using usage APIs
+package usage
 
 import (
-	"github.com/ydataai/aws-adapter/pkg/common"
 	"github.com/ydataai/go-core/pkg/common/logging"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 )
 
-// EC2ClientInterface defines a interface for ec2 client
-type EC2ClientInterface interface {
-	GetGPUInstances(string) (common.GPU, error)
+// EC2Client defines a interface for ec2 client
+type EC2Client interface {
+	GetGPUInstances(string) (GPU, error)
 }
 
-// EC2Client is the ec2 client
-type EC2Client struct {
+type ec2Client struct {
 	log logging.Logger
 	ec2 *ec2.EC2
 }
 
 // NewEC2Client initializes ec2 client
 func NewEC2Client(log logging.Logger, ec2 *ec2.EC2) EC2Client {
-	return EC2Client{
+	return ec2Client{
 		log: log,
 		ec2: ec2,
 	}
 }
 
 // GetGPUInstances fetches gpu instances
-func (sq EC2Client) GetGPUInstances(gpuInstaceType string) (common.GPU, error) {
+func (sq ec2Client) GetGPUInstances(gpuInstaceType string) (GPU, error) {
 	sq.log.Info("Starting to featch running GPU instances")
 
 	inputs := ec2.DescribeInstancesInput{
@@ -46,7 +45,7 @@ func (sq EC2Client) GetGPUInstances(gpuInstaceType string) (common.GPU, error) {
 		return 0, err
 	}
 
-	gpuInstancesNumber := common.GPU(len(gpuInstances.Reservations))
+	gpuInstancesNumber := GPU(len(gpuInstances.Reservations))
 
 	return gpuInstancesNumber, nil
 }

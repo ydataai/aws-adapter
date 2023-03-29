@@ -5,10 +5,10 @@
 package mock
 
 import (
-	reflect "reflect"
+	"reflect"
 
-	gomock "github.com/golang/mock/gomock"
-	common "github.com/ydataai/aws-adapter/pkg/common"
+	"github.com/golang/mock/gomock"
+	"github.com/ydataai/aws-adapter/internal/usage"
 )
 
 // MockServiceQuotaClientInterface is a mock of ServiceQuotaClientInterface interface.
@@ -35,10 +35,10 @@ func (m *MockServiceQuotaClientInterface) EXPECT() *MockServiceQuotaClientInterf
 }
 
 // GetAvailableGPUInstances mocks base method.
-func (m *MockServiceQuotaClientInterface) GetAvailableGPUInstances(arg0, arg1 string) (common.GPU, error) {
+func (m *MockServiceQuotaClientInterface) GetAvailableGPUInstances(arg0, arg1 string) (usage.GPU, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAvailableGPUInstances", arg0, arg1)
-	ret0, _ := ret[0].(common.GPU)
+	ret0, _ := ret[0].(usage.GPU)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

@@ -1,4 +1,5 @@
-package marketplace
+// Package metering provides objects to interact with metering API
+package metering
 
 import (
 	"context"
@@ -8,21 +9,20 @@ import (
 	"github.com/ydataai/go-core/pkg/metering"
 )
 
-type awsMeteringService struct {
-	config      AWSMarketplaceConfiguration
+type client struct {
+	config      Configuration
 	marketplace *marketplacemetering.MarketplaceMetering
 }
 
-func NewMarketplaceMetering(
-	config AWSMarketplaceConfiguration, marketplace *marketplacemetering.MarketplaceMetering,
-) metering.Client {
-	return awsMeteringService{
+// NewClient initializes a metering Client to interact with aws services
+func NewClient(config Configuration, marketplace *marketplacemetering.MarketplaceMetering) metering.Client {
+	return client{
 		config:      config,
 		marketplace: marketplace,
 	}
 }
 
-func (s awsMeteringService) CreateUsageEvent(
+func (s client) CreateUsageEvent(
 	ctx context.Context, req metering.UsageEvent,
 ) (metering.UsageEventResponse, error) {
 	// event
@@ -45,7 +45,7 @@ func (s awsMeteringService) CreateUsageEvent(
 	}, nil
 }
 
-func (s awsMeteringService) CreateUsageEventBatch(
+func (s client) CreateUsageEventBatch(
 	ctx context.Context, req metering.UsageEventBatch,
 ) (metering.UsageEventBatchResponse, error) {
 	output := []metering.UsageEventResponse{}
@@ -69,7 +69,7 @@ func (s awsMeteringService) CreateUsageEventBatch(
 
 // round
 // returns the nearest integer, rounding half away from zero.
-func (s awsMeteringService) round(quantity float32) *int64 {
+func (s client) round(quantity float32) *int64 {
 	rounded := int64(math.Round(float64(quantity)))
 	return &rounded
 }

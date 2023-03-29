@@ -1,10 +1,10 @@
-package controller
+// Package usage offers objects and methods to help using usage APIs
+package usage
 
 import (
 	"context"
 	"net/http"
 
-	"github.com/ydataai/aws-adapter/pkg/service"
 	"github.com/ydataai/go-core/pkg/common/config"
 	"github.com/ydataai/go-core/pkg/common/logging"
 	"github.com/ydataai/go-core/pkg/common/server"
@@ -15,14 +15,14 @@ import (
 // RESTController defines rest controller
 type RESTController struct {
 	log           logging.Logger
-	restService   service.RESTServiceInterface
+	restService   Service
 	configuration config.RESTControllerConfiguration
 }
 
 // NewRESTController initializes rest controller
 func NewRESTController(
 	log logging.Logger,
-	restService service.RESTServiceInterface,
+	restService Service,
 	configuration config.RESTControllerConfiguration,
 ) RESTController {
 	return RESTController{
@@ -34,14 +34,7 @@ func NewRESTController(
 
 // Boot ...
 func (r RESTController) Boot(s server.Server) {
-	s.Router().GET("/healthz", r.healthCheck())
 	s.Router().GET("/available/gpu", r.getAvailableGPU())
-}
-
-func (r RESTController) healthCheck() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		ctx.Status(http.StatusNoContent)
-	}
 }
 
 func (r RESTController) getAvailableGPU() gin.HandlerFunc {

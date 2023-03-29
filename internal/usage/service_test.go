@@ -1,4 +1,4 @@
-package service_test
+package usage_test
 
 import (
 	"context"
@@ -10,10 +10,8 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/google/go-cmp/cmp"
 
+	"github.com/ydataai/aws-adapter/internal/usage"
 	"github.com/ydataai/aws-adapter/mock"
-	"github.com/ydataai/aws-adapter/pkg/clients"
-	"github.com/ydataai/aws-adapter/pkg/common"
-	"github.com/ydataai/aws-adapter/pkg/service"
 	"github.com/ydataai/go-core/pkg/common/logging"
 )
 
@@ -31,20 +29,20 @@ func TestAvailableGPU(t *testing.T) {
 
 		tt := []struct {
 			name          string
-			ec2M          func(context.Context, *gomock.Controller) clients.EC2ClientInterface
-			serviceQuotaM func(context.Context, *gomock.Controller) clients.ServiceQuotaClientInterface
+			ec2M          func(context.Context, *gomock.Controller) usage.EC2Client
+			serviceQuotaM func(context.Context, *gomock.Controller) usage.ServiceQuotaClient
 			err           error
 		}{
 			{
 				name: "failure on ec2 request",
-				ec2M: func(ctx context.Context, ctrl *gomock.Controller) clients.EC2ClientInterface {
+				ec2M: func(ctx context.Context, ctrl *gomock.Controller) usage.EC2Client {
 					ec2M := mock.NewMockEC2ClientInterface(ctrl)
 					ec2M.EXPECT().
-						GetGPUInstances(gomock.Any()).Return(common.GPU(0), errM)
+						GetGPUInstances(gomock.Any()).Return(usage.GPU(0), errM)
 
 					return ec2M
 				},
-				serviceQuotaM: func(ctx context.Context, ctrl *gomock.Controller) clients.ServiceQuotaClientInterface {
+				serviceQuotaM: func(ctx context.Context, ctrl *gomock.Controller) usage.ServiceQuotaClient {
 					serviceQuotaM := mock.NewMockServiceQuotaClientInterface(ctrl)
 
 					return serviceQuotaM
@@ -53,19 +51,19 @@ func TestAvailableGPU(t *testing.T) {
 			},
 			{
 				name: "failure on service quota request",
-				ec2M: func(ctx context.Context, ctrl *gomock.Controller) clients.EC2ClientInterface {
+				ec2M: func(ctx context.Context, ctrl *gomock.Controller) usage.EC2Client {
 					ec2M := mock.NewMockEC2ClientInterface(ctrl)
 					ec2M.EXPECT().
-						GetGPUInstances(gomock.Any()).Return(common.GPU(0), nil)
+						GetGPUInstances(gomock.Any()).Return(usage.GPU(0), nil)
 
 					return ec2M
 				},
-				serviceQuotaM: func(ctx context.Context, ctrl *gomock.Controller) clients.ServiceQuotaClientInterface {
+				serviceQuotaM: func(ctx context.Context, ctrl *gomock.Controller) usage.ServiceQuotaClient {
 					serviceQuotaM := mock.NewMockServiceQuotaClientInterface(ctrl)
 
 					serviceQuotaM.EXPECT().
 						GetAvailableGPUInstances(gomock.Any(), gomock.Any()).
-						Return(common.GPU(0), errM)
+						Return(usage.GPU(0), errM)
 
 					return serviceQuotaM
 				},
@@ -80,9 +78,9 @@ func TestAvailableGPU(t *testing.T) {
 
 				ctx := context.Background()
 
-				restServiceConfiguration := service.RESTServiceConfiguration{}
+				restServiceConfiguration := usage.ServiceConfiguration{}
 
-				restService := service.NewRESTService(
+				restService := usage.NewService(
 					logger,
 					tc.ec2M(ctx, ctrl),
 					tc.serviceQuotaM(ctx, ctrl),
@@ -104,17 +102,17 @@ func TestAvailableGPU(t *testing.T) {
 
 		ctx := context.Background()
 
-		restServiceConfiguration := service.RESTServiceConfiguration{}
+		restServiceConfiguration := usage.ServiceConfiguration{}
 
 		ec2M := mock.NewMockEC2ClientInterface(ctrl)
 		ec2M.EXPECT().
-			GetGPUInstances(gomock.Any()).Return(common.GPU(2), nil)
+			GetGPUInstances(gomock.Any()).Return(usage.GPU(2), nil)
 
 		serviceQuotaM := mock.NewMockServiceQuotaClientInterface(ctrl)
 		serviceQuotaM.EXPECT().
-			GetAvailableGPUInstances(gomock.Any(), gomock.Any()).Return(common.GPU(4), nil)
+			GetAvailableGPUInstances(gomock.Any(), gomock.Any()).Return(usage.GPU(4), nil)
 
-		restService := service.NewRESTService(
+		restService := usage.NewService(
 			logger,
 			ec2M,
 			serviceQuotaM,
@@ -126,7 +124,7 @@ func TestAvailableGPU(t *testing.T) {
 			t.Fatal("should not return any error")
 		}
 
-		if diff := cmp.Diff(gpu, common.GPU(2)); diff != "" {
+		if diff := cmp.Diff(gpu, usage.GPU(2)); diff != "" {
 			t.Fatalf("should be 2, got %v", gpu)
 			t.Fatal(diff)
 		}

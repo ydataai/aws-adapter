@@ -1,4 +1,4 @@
-// Package main for quota executable
+// Package main for metering executable
 package main
 
 import (
@@ -6,16 +6,14 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/marketplacemetering"
 	"github.com/ydataai/aws-adapter/internal/configuration"
-	"github.com/ydataai/aws-adapter/internal/usage"
+	"github.com/ydataai/aws-adapter/internal/metering"
 	"github.com/ydataai/go-core/pkg/common/config"
 	"github.com/ydataai/go-core/pkg/common/logging"
 	"github.com/ydataai/go-core/pkg/common/server"
-
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/aws/aws-sdk-go/service/servicequotas"
 )
 
 var (
@@ -24,18 +22,20 @@ var (
 
 func main() {
 	applicationConfiguration := configuration.Application{}
-	restServiceConfiguration := usage.ServiceConfiguration{}
 	serverConfiguration := server.HTTPServerConfiguration{}
 	restControllerConfiguration := config.RESTControllerConfiguration{}
 	loggerConfiguration := logging.LoggerConfiguration{}
+	meteringConfiguration := metering.Configuration{}
 
-	if err := config.InitConfigurationVariables([]config.ConfigurationVariables{
-		&restServiceConfiguration,
+	configs := []config.ConfigurationVariables{
+		&applicationConfiguration,
 		&serverConfiguration,
 		&restControllerConfiguration,
-		&applicationConfiguration,
-	}); err != nil {
-		fmt.Println(fmt.Errorf("could not set configuration variables. Err: %v", err))
+		&loggerConfiguration,
+		&meteringConfiguration,
+	}
+	if err := config.InitConfigurationVariables(configs); err != nil {
+		fmt.Printf("Failed to initialize env configurations. Err: %v", err)
 		os.Exit(1)
 	}
 
@@ -44,18 +44,11 @@ func main() {
 	sess := session.Must(session.NewSession(&aws.Config{
 		Region: aws.String(applicationConfiguration.Region),
 	}))
+	meteringClient := metering.NewClient(meteringConfiguration, marketplacemetering.New(sess))
 
-	ec2Service := ec2.New(sess)
-	serviceQuotaService := servicequotas.New(sess)
-
-	ec2Client := usage.NewEC2Client(logger, ec2Service)
-	serviceQuotaClient := usage.NewServiceQuotaClient(logger, serviceQuotaService)
-
-	restService := usage.NewService(logger, ec2Client, serviceQuotaClient, restServiceConfiguration)
-	restController := usage.NewRESTController(logger, restService, restControllerConfiguration)
+	restController := metering.NewRESTController(logger, meteringClient, restControllerConfiguration)
 
 	serverCtx := context.Background()
-
 	httpServer := server.NewServer(logger, serverConfiguration)
 	httpServer.AddHealthz()
 	httpServer.AddReadyz(nil)
