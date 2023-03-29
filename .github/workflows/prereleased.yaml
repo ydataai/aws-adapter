@@ -68,6 +68,11 @@ jobs:
     needs:
     - prepare
 
+    strategy:
+      fail-fast: true
+      matrix:
+        package: [metering, quota]
+
     steps:
     - uses: actions/checkout@v3
 
@@ -75,8 +80,10 @@ jobs:
       id: docker_build
       uses: docker/build-push-action@v4
       env:
-        DOCKER_IMAGE_TAG: ${{ env.DOCKER_REPOSITORY }}:${{ needs.prepare.outputs.version }}
+        DOCKER_IMAGE_TAG: ${{ env.DOCKER_REPOSITORY }}/${{ matrix.package }}:${{ needs.prepare.outputs.version }}
       with:
+        build-args: |
+          COMPILE_CMD=${{ matrix.package }}
         context: .
         push: false
         load: true
@@ -136,7 +143,7 @@ jobs:
 
     - name: Push Docker Image
       env:
-        DOCKER_IMAGE_TAG: ${{ steps.ecr_password.outputs.registry }}/${{ env.DOCKER_REPOSITORY }}:${{ needs.prepare.outputs.version }}
+        DOCKER_IMAGE_TAG: ${{ steps.ecr_password.outputs.registry }}/${{ env.DOCKER_REPOSITORY }}/${{ matrix.package }}:${{ needs.prepare.outputs.version }}
       run: |
         docker tag ${{ steps.docker_build.outputs.imageId }} ${{ env.DOCKER_IMAGE_TAG }}
         docker push ${{ env.DOCKER_IMAGE_TAG }}
@@ -149,6 +156,12 @@ jobs:
     needs:
     - prepare
     - build
+
+    strategy:
+      fail-fast: true
+      max-parallel: 1
+      matrix:
+        package: [metering, quota]
 
     steps:
     - name: Checkout Manifests repo
@@ -163,10 +176,12 @@ jobs:
 
     - name: Update kustomization image tag
       env:
+        CONTAINER_PKG: ${{ matrix.package }}-${{ env.CONTAINER }}
+        DOCKER_IMAGE_TAG: ${{ env.DOCKER_REPOSITORY }}/${{ matrix.package }}:${{ needs.prepare.outputs.version }}
         VERSION: ${{ needs.prepare.outputs.version }}
       run: |
         cd ${COMPONENT_PATH}
-        kustomize edit set image ${CONTAINER}=${DOCKER_REPOSITORY}:${VERSION}
+        kustomize edit set image ${CONTAINER_PKG}=${DOCKER_IMAGE_TAG}
 
     - name: Commit and push image update into manifests repo
       env:
@@ -174,5 +189,5 @@ jobs:
       run: |
         git config user.email "azory@ydata.ai"
         git config user.name "Azory YData Bot"
-        git commit -a -m "chore(bump): [CI] [DEV] bump ${{ env.COMPONENT }} to $VERSION"
+        git commit -a -m "chore(bump): [CI] [DEV] bump ${{ env.COMPONENT }} package ${{ matrix.package }} to $VERSION"
         git push origin master
