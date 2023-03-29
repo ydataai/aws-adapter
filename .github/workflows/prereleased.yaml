@@ -17,7 +17,7 @@ env:
   ECR_ROLE_ARN: ${{ secrets.AWS_ECR_ROLE_ARN }}
 
   DOCKER_REPOSITORY: aws-adapter
-  CONTAINER: aws-adapter-container-image
+  CONTAINER: quota-aws-adapter-container-image
 
   AWS_S3_REGION: ${{ secrets.AWS_S3_REGION }}
   SBOM_FILENAME: docker-sbom
