@@ -5,10 +5,10 @@
 package mock
 
 import (
-	reflect "reflect"
+	"reflect"
 
-	gomock "github.com/golang/mock/gomock"
-	common "github.com/ydataai/aws-adapter/pkg/common"
+	"github.com/golang/mock/gomock"
+	"github.com/ydataai/aws-adapter/internal/usage"
 )
 
 // MockEC2ClientInterface is a mock of EC2ClientInterface interface.
@@ -35,10 +35,10 @@ func (m *MockEC2ClientInterface) EXPECT() *MockEC2ClientInterfaceMockRecorder {
 }
 
 // GetGPUInstances mocks base method.
-func (m *MockEC2ClientInterface) GetGPUInstances(arg0 string) (common.GPU, error) {
+func (m *MockEC2ClientInterface) GetGPUInstances(arg0 string) (usage.GPU, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetGPUInstances", arg0)
-	ret0, _ := ret[0].(common.GPU)
+	ret0, _ := ret[0].(usage.GPU)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

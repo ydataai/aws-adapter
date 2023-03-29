@@ -5,11 +5,11 @@
 package mock
 
 import (
-	context "context"
-	reflect "reflect"
+	"context"
+	"reflect"
 
-	gomock "github.com/golang/mock/gomock"
-	common "github.com/ydataai/aws-adapter/pkg/common"
+	"github.com/golang/mock/gomock"
+	"github.com/ydataai/aws-adapter/internal/usage"
 )
 
 // MockRESTServiceInterface is a mock of RESTServiceInterface interface.
@@ -36,10 +36,10 @@ func (m *MockRESTServiceInterface) EXPECT() *MockRESTServiceInterfaceMockRecorde
 }
 
 // AvailableGPU mocks base method.
-func (m *MockRESTServiceInterface) AvailableGPU(ctx context.Context) (common.GPU, error) {
+func (m *MockRESTServiceInterface) AvailableGPU(ctx context.Context) (usage.GPU, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AvailableGPU", ctx)
-	ret0, _ := ret[0].(common.GPU)
+	ret0, _ := ret[0].(usage.GPU)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
