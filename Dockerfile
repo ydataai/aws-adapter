@@ -12,7 +12,7 @@ ENV CGO_ENABLED=0
 RUN go mod download
 
 # Build
-RUN go build -a -o main "/workspace/cmd/${COMPILE_CMD}"
+RUN go build -a -o main "./cmd/${COMPILE_CMD}"
 
 # Use distroless as minimal base image to package the manager binary
 FROM gcr.io/distroless/base:latest-amd64
