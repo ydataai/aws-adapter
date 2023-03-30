@@ -3,12 +3,12 @@ module github.com/ydataai/aws-adapter
 go 1.20
 
 require (
-	github.com/aws/aws-sdk-go v1.44.232
+	github.com/aws/aws-sdk-go v1.44.233
 	github.com/gin-gonic/gin v1.9.0
 	github.com/golang/mock v1.6.0
 	github.com/google/go-cmp v0.5.9
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/ydataai/go-core v0.13.0-799de27
+	github.com/ydataai/go-core v0.13.0
 )
 
 require (
