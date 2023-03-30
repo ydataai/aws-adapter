@@ -38,7 +38,7 @@ func NewService(
 func (rs service) AvailableGPU(ctx context.Context) (GPU, error) {
 	rs.logger.Infof("Fetching available GPUs to %v", rs.configuration.GPUInstanceType)
 
-	runningGPUInstances, err := rs.ec2Client.GetGPUInstances(rs.configuration.GPUInstanceType)
+	runningGPUInstances, err := rs.ec2Client.GetGPUInstances(ctx, rs.configuration.GPUInstanceType)
 	if err != nil {
 		rs.logger.Errorf("while fetching gpu instances. Error: %+v", err)
 		return GPU(0), err
@@ -47,7 +47,7 @@ func (rs service) AvailableGPU(ctx context.Context) (GPU, error) {
 	rs.logger.Infof("Running GPUs %s instances: %f", rs.configuration.GPUInstanceType, runningGPUInstances)
 
 	availableInstances, err := rs.quotaClient.GetAvailableQuota(
-		rs.configuration.GPUQuotaCode, rs.configuration.GPUQuotaServiceCode)
+		ctx, rs.configuration.GPUQuotaCode, rs.configuration.GPUQuotaServiceCode)
 	if err != nil {
 		rs.logger.Errorf("while fetching available instances. Error: %+v", err)
 		return GPU(0), err

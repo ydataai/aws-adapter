@@ -38,7 +38,7 @@ func TestAvailableGPU(t *testing.T) {
 				ec2M: func(ctx context.Context, ctrl *gomock.Controller) usage.EC2Client {
 					ec2M := mock.NewMockEC2ClientInterface(ctrl)
 					ec2M.EXPECT().
-						GetGPUInstances(gomock.Any()).Return(usage.GPU(0), errM)
+						GetGPUInstances(gomock.Any(), gomock.Any()).Return(usage.GPU(0), errM)
 
 					return ec2M
 				},
@@ -54,7 +54,7 @@ func TestAvailableGPU(t *testing.T) {
 				ec2M: func(ctx context.Context, ctrl *gomock.Controller) usage.EC2Client {
 					ec2M := mock.NewMockEC2ClientInterface(ctrl)
 					ec2M.EXPECT().
-						GetGPUInstances(gomock.Any()).Return(usage.GPU(0), nil)
+						GetGPUInstances(gomock.Any(), gomock.Any()).Return(usage.GPU(0), nil)
 
 					return ec2M
 				},
@@ -62,7 +62,7 @@ func TestAvailableGPU(t *testing.T) {
 					serviceQuotaM := mock.NewMockServiceQuotaClientInterface(ctrl)
 
 					serviceQuotaM.EXPECT().
-						GetAvailableQuota(gomock.Any(), gomock.Any()).
+						GetAvailableQuota(gomock.Any(), gomock.Any(), gomock.Any()).
 						Return(float64(0), errM)
 
 					return serviceQuotaM
@@ -111,11 +111,11 @@ func TestAvailableGPU(t *testing.T) {
 
 		ec2M := mock.NewMockEC2ClientInterface(ctrl)
 		ec2M.EXPECT().
-			GetGPUInstances(gomock.Any()).Return(usage.GPU(2), nil)
+			GetGPUInstances(gomock.Any(), gomock.Any()).Return(usage.GPU(2), nil)
 
 		serviceQuotaM := mock.NewMockServiceQuotaClientInterface(ctrl)
 		serviceQuotaM.EXPECT().
-			GetAvailableQuota(gomock.Any(), gomock.Any()).Return(float64(16), nil)
+			GetAvailableQuota(gomock.Any(), gomock.Any(), gomock.Any()).Return(float64(16), nil)
 
 		restService := usage.NewService(
 			logger,

@@ -2,6 +2,7 @@
 package usage
 
 import (
+	"context"
 	"log"
 
 	"github.com/ydataai/go-core/pkg/common/logging"
@@ -10,13 +11,9 @@ import (
 	"github.com/aws/aws-sdk-go/service/servicequotas"
 )
 
-const (
-	vCPUToGPUFactor float64 = 4
-)
-
 // QuotaClient defines an interface for service quota client
 type QuotaClient interface {
-	GetAvailableQuota(string, string) (float64, error)
+	GetAvailableQuota(context.Context, string, string) (float64, error)
 }
 
 type quotaClient struct {
@@ -24,7 +21,7 @@ type quotaClient struct {
 	serviceQuota *servicequotas.ServiceQuotas
 }
 
-// NewServiceQuotaClient initializes service quota
+// NewQuotaClient initializes service quota
 func NewQuotaClient(logger logging.Logger, serviceQuota *servicequotas.ServiceQuotas) QuotaClient {
 	return quotaClient{
 		logger:       logger,
@@ -33,10 +30,12 @@ func NewQuotaClient(logger logging.Logger, serviceQuota *servicequotas.ServiceQu
 }
 
 // GetAvailableQuota fetchs available gpu instances in service quota
-func (sq quotaClient) GetAvailableQuota(gpuQuotaCode string, gpuQuotaServiceCode string) (float64, error) {
+func (sq quotaClient) GetAvailableQuota(
+	ctx context.Context, gpuQuotaCode string, gpuQuotaServiceCode string,
+) (float64, error) {
 	sq.logger.Infof("Starting to fetch Available %s GPU instances for quota code", gpuQuotaCode)
 
-	quota, err := sq.serviceQuota.GetServiceQuota(&servicequotas.GetServiceQuotaInput{
+	quota, err := sq.serviceQuota.GetServiceQuotaWithContext(ctx, &servicequotas.GetServiceQuotaInput{
 		QuotaCode:   aws.String(gpuQuotaCode),
 		ServiceCode: aws.String(gpuQuotaServiceCode),
 	})

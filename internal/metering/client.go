@@ -32,12 +32,12 @@ func (s client) CreateUsageEvent(
 		UsageQuantity:  s.round(req.Quantity),
 		Timestamp:      &req.StartAt,
 	}
-	// send
+
 	output, err := s.marketplace.MeterUsageWithContext(ctx, event)
 	if err != nil {
 		return metering.UsageEventResponse{}, err
 	}
-	// result
+
 	return metering.UsageEventResponse{
 		UsageEventID: *output.MeteringRecordId,
 		DimensionID:  req.DimensionID,
@@ -50,20 +50,19 @@ func (s client) CreateUsageEventBatch(
 ) (metering.UsageEventBatchResponse, error) {
 	output := []metering.UsageEventResponse{}
 	for _, event := range req.Events {
-		// events
 		req := metering.UsageEvent{
 			DimensionID: event.DimensionID,
 			Quantity:    event.Quantity,
 			StartAt:     event.StartAt,
 		}
-		// send
+
 		res, err := s.CreateUsageEvent(ctx, req)
 		if err != nil {
 			return metering.UsageEventBatchResponse{}, err
 		}
 		output = append(output, res)
 	}
-	// result
+
 	return metering.UsageEventBatchResponse{Result: output}, nil
 }
 

@@ -5,6 +5,7 @@
 package mock
 
 import (
+  "context"
 	"reflect"
 
 	"github.com/golang/mock/gomock"
@@ -35,16 +36,16 @@ func (m *MockEC2ClientInterface) EXPECT() *MockEC2ClientInterfaceMockRecorder {
 }
 
 // GetGPUInstances mocks base method.
-func (m *MockEC2ClientInterface) GetGPUInstances(arg0 string) (usage.GPU, error) {
+func (m *MockEC2ClientInterface) GetGPUInstances(ctx context.Context, arg0 string) (usage.GPU, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetGPUInstances", arg0)
+	ret := m.ctrl.Call(m, "GetGPUInstances", ctx, arg0)
 	ret0, _ := ret[0].(usage.GPU)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetGPUInstances indicates an expected call of GetGPUInstances.
-func (mr *MockEC2ClientInterfaceMockRecorder) GetGPUInstances(arg0 interface{}) *gomock.Call {
+func (mr *MockEC2ClientInterfaceMockRecorder) GetGPUInstances(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetGPUInstances", reflect.TypeOf((*MockEC2ClientInterface)(nil).GetGPUInstances), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetGPUInstances", reflect.TypeOf((*MockEC2ClientInterface)(nil).GetGPUInstances), arg0, arg1)
 }

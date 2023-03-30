@@ -2,6 +2,8 @@
 package usage
 
 import (
+	"context"
+
 	"github.com/ydataai/go-core/pkg/common/logging"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -10,7 +12,7 @@ import (
 
 // EC2Client defines a interface for ec2 client
 type EC2Client interface {
-	GetGPUInstances(string) (GPU, error)
+	GetGPUInstances(context.Context, string) (GPU, error)
 }
 
 type ec2Client struct {
@@ -27,7 +29,7 @@ func NewEC2Client(logger logging.Logger, ec2 *ec2.EC2) EC2Client {
 }
 
 // GetGPUInstances fetches gpu instances
-func (sq ec2Client) GetGPUInstances(gpuInstaceType string) (GPU, error) {
+func (sq ec2Client) GetGPUInstances(ctx context.Context, gpuInstaceType string) (GPU, error) {
 	sq.logger.Infof("Starting to fetch running %s GPU instances", gpuInstaceType)
 
 	inputs := ec2.DescribeInstancesInput{
@@ -39,7 +41,7 @@ func (sq ec2Client) GetGPUInstances(gpuInstaceType string) (GPU, error) {
 		},
 	}
 
-	gpuInstances, err := sq.ec2.DescribeInstances(&inputs)
+	gpuInstances, err := sq.ec2.DescribeInstancesWithContext(ctx, &inputs)
 	if err != nil {
 		sq.logger.Error(err)
 		return 0, err
