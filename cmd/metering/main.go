@@ -41,9 +41,11 @@ func main() {
 
 	logger := logging.NewLogger(loggerConfiguration)
 
-	sess := session.Must(session.NewSession(&aws.Config{
-		Region: aws.String(applicationConfiguration.Region),
-	}))
+	awsConfig := &aws.Config{}
+	if len(applicationConfiguration.Region) > 0 {
+		awsConfig.Region = aws.String(applicationConfiguration.Region)
+	}
+	sess := session.Must(session.NewSession(awsConfig))
 	meteringClient := metering.NewClient(meteringConfiguration, marketplacemetering.New(sess))
 
 	restController := metering.NewRESTController(logger, meteringClient, restControllerConfiguration)

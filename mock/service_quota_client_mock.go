@@ -8,7 +8,6 @@ import (
 	"reflect"
 
 	"github.com/golang/mock/gomock"
-	"github.com/ydataai/aws-adapter/internal/usage"
 )
 
 // MockServiceQuotaClientInterface is a mock of ServiceQuotaClientInterface interface.
@@ -35,16 +34,16 @@ func (m *MockServiceQuotaClientInterface) EXPECT() *MockServiceQuotaClientInterf
 }
 
 // GetAvailableGPUInstances mocks base method.
-func (m *MockServiceQuotaClientInterface) GetAvailableGPUInstances(arg0, arg1 string) (usage.GPU, error) {
+func (m *MockServiceQuotaClientInterface) GetAvailableQuota(arg0, arg1 string) (float64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAvailableGPUInstances", arg0, arg1)
-	ret0, _ := ret[0].(usage.GPU)
+	ret0, _ := ret[0].(float64)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetAvailableGPUInstances indicates an expected call of GetAvailableGPUInstances.
-func (mr *MockServiceQuotaClientInterfaceMockRecorder) GetAvailableGPUInstances(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockServiceQuotaClientInterfaceMockRecorder) GetAvailableQuota(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAvailableGPUInstances", reflect.TypeOf((*MockServiceQuotaClientInterface)(nil).GetAvailableGPUInstances), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAvailableGPUInstances", reflect.TypeOf((*MockServiceQuotaClientInterface)(nil).GetAvailableQuota), arg0, arg1)
 }

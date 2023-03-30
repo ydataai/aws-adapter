@@ -7,7 +7,7 @@ import (
 
 // Application defines all env vars required for the application
 type Application struct {
-	Region string `envconfig:"REGION" required:"true"`
+	Region string `envconfig:"REGION"`
 }
 
 // LoadFromEnvVars reads all env vars required for the quota package

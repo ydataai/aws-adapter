@@ -13,47 +13,51 @@ type Service interface {
 }
 
 type service struct {
-	log                logging.Logger
-	ec2Client          EC2Client
-	serviceQuotaClient ServiceQuotaClient
-	configuration      ServiceConfiguration
+	logger        logging.Logger
+	ec2Client     EC2Client
+	quotaClient   QuotaClient
+	configuration ServiceConfiguration
 }
 
 // NewService initializes rest service
 func NewService(
-	log logging.Logger,
+	logger logging.Logger,
 	ec2Client EC2Client,
-	serviceQuotaClient ServiceQuotaClient,
+	quotaClient QuotaClient,
 	configuration ServiceConfiguration,
 ) Service {
 	return service{
-		log:                log,
-		ec2Client:          ec2Client,
-		serviceQuotaClient: serviceQuotaClient,
-		configuration:      configuration,
+		logger:        logger,
+		ec2Client:     ec2Client,
+		quotaClient:   quotaClient,
+		configuration: configuration,
 	}
 }
 
 // AvailableGPU ..
 func (rs service) AvailableGPU(ctx context.Context) (GPU, error) {
-	rs.log.Info("Starting to featch available GPU")
+	rs.logger.Infof("Fetching available GPUs to %v", rs.configuration.GPUInstanceType)
 
-	gpuInstances, err := rs.ec2Client.GetGPUInstances(rs.configuration.GPUInstanceType)
+	runningGPUInstances, err := rs.ec2Client.GetGPUInstances(rs.configuration.GPUInstanceType)
 	if err != nil {
-		rs.log.Infof("while fetching gpu instances. Error: %v", gpuInstances)
+		rs.logger.Errorf("while fetching gpu instances. Error: %+v", err)
 		return GPU(0), err
 	}
 
-	availableGPUInstances, err := rs.serviceQuotaClient.GetAvailableGPUInstances(
-		rs.configuration.GPUInstanceType,
-		rs.configuration.GPUQuotaServiceCode,
-	)
+	rs.logger.Infof("Running GPUs %s instances: %f", rs.configuration.GPUInstanceType, runningGPUInstances)
+
+	availableInstances, err := rs.quotaClient.GetAvailableQuota(
+		rs.configuration.GPUQuotaCode, rs.configuration.GPUQuotaServiceCode)
 	if err != nil {
-		rs.log.Infof("while fetching available gpu instances. Error: %v", availableGPUInstances)
+		rs.logger.Errorf("while fetching available instances. Error: %+v", err)
 		return GPU(0), err
 	}
 
-	gpus := availableGPUInstances - gpuInstances
+	availableGPUInstances := GPU(availableInstances / float64(rs.configuration.GPUvCPUFactor))
+
+	rs.logger.Infof("Available GPUs %s instances: %f", rs.configuration.GPUInstanceType, availableGPUInstances)
+
+	gpus := availableGPUInstances - runningGPUInstances
 
 	return gpus, nil
 }

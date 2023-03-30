@@ -30,7 +30,7 @@ func TestAvailableGPU(t *testing.T) {
 		tt := []struct {
 			name          string
 			ec2M          func(context.Context, *gomock.Controller) usage.EC2Client
-			serviceQuotaM func(context.Context, *gomock.Controller) usage.ServiceQuotaClient
+			serviceQuotaM func(context.Context, *gomock.Controller) usage.QuotaClient
 			err           error
 		}{
 			{
@@ -42,7 +42,7 @@ func TestAvailableGPU(t *testing.T) {
 
 					return ec2M
 				},
-				serviceQuotaM: func(ctx context.Context, ctrl *gomock.Controller) usage.ServiceQuotaClient {
+				serviceQuotaM: func(ctx context.Context, ctrl *gomock.Controller) usage.QuotaClient {
 					serviceQuotaM := mock.NewMockServiceQuotaClientInterface(ctrl)
 
 					return serviceQuotaM
@@ -58,12 +58,12 @@ func TestAvailableGPU(t *testing.T) {
 
 					return ec2M
 				},
-				serviceQuotaM: func(ctx context.Context, ctrl *gomock.Controller) usage.ServiceQuotaClient {
+				serviceQuotaM: func(ctx context.Context, ctrl *gomock.Controller) usage.QuotaClient {
 					serviceQuotaM := mock.NewMockServiceQuotaClientInterface(ctrl)
 
 					serviceQuotaM.EXPECT().
-						GetAvailableGPUInstances(gomock.Any(), gomock.Any()).
-						Return(usage.GPU(0), errM)
+						GetAvailableQuota(gomock.Any(), gomock.Any()).
+						Return(float64(0), errM)
 
 					return serviceQuotaM
 				},
@@ -102,7 +102,12 @@ func TestAvailableGPU(t *testing.T) {
 
 		ctx := context.Background()
 
-		restServiceConfiguration := usage.ServiceConfiguration{}
+		restServiceConfiguration := usage.ServiceConfiguration{
+			GPUInstanceType:     "test-instance-type",
+			GPUQuotaCode:        "test-quota-code",
+			GPUQuotaServiceCode: "test-ec2",
+			GPUvCPUFactor:       4,
+		}
 
 		ec2M := mock.NewMockEC2ClientInterface(ctrl)
 		ec2M.EXPECT().
@@ -110,7 +115,7 @@ func TestAvailableGPU(t *testing.T) {
 
 		serviceQuotaM := mock.NewMockServiceQuotaClientInterface(ctrl)
 		serviceQuotaM.EXPECT().
-			GetAvailableGPUInstances(gomock.Any(), gomock.Any()).Return(usage.GPU(4), nil)
+			GetAvailableQuota(gomock.Any(), gomock.Any()).Return(float64(16), nil)
 
 		restService := usage.NewService(
 			logger,

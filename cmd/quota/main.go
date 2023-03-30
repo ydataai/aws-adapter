@@ -34,6 +34,7 @@ func main() {
 		&serverConfiguration,
 		&restControllerConfiguration,
 		&applicationConfiguration,
+		&loggerConfiguration,
 	}); err != nil {
 		fmt.Println(fmt.Errorf("could not set configuration variables. Err: %v", err))
 		os.Exit(1)
@@ -41,15 +42,17 @@ func main() {
 
 	logger := logging.NewLogger(loggerConfiguration)
 
-	sess := session.Must(session.NewSession(&aws.Config{
-		Region: aws.String(applicationConfiguration.Region),
-	}))
+	awsConfig := &aws.Config{}
+	if len(applicationConfiguration.Region) > 0 {
+		awsConfig.Region = aws.String(applicationConfiguration.Region)
+	}
+	sess := session.Must(session.NewSession(awsConfig))
 
 	ec2Service := ec2.New(sess)
 	serviceQuotaService := servicequotas.New(sess)
 
 	ec2Client := usage.NewEC2Client(logger, ec2Service)
-	serviceQuotaClient := usage.NewServiceQuotaClient(logger, serviceQuotaService)
+	serviceQuotaClient := usage.NewQuotaClient(logger, serviceQuotaService)
 
 	restService := usage.NewService(logger, ec2Client, serviceQuotaClient, restServiceConfiguration)
 	restController := usage.NewRESTController(logger, restService, restControllerConfiguration)

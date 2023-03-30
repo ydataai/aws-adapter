@@ -6,7 +6,9 @@ import "github.com/kelseyhightower/envconfig"
 // ServiceConfiguration defines required configuration for rest service
 type ServiceConfiguration struct {
 	GPUInstanceType     string `envconfig:"GPU_INSTANCE_TYPE" required:"true"`
+	GPUQuotaCode        string `envconfig:"GPU_QUOTA_CODE" required:"true"`
 	GPUQuotaServiceCode string `envconfig:"GPU_QUOTA_SERVICE_CODE" required:"true"`
+	GPUvCPUFactor       int    `envconfig:"GPU_VCPU_FACTOR" required:"true"`
 }
 
 // LoadFromEnvVars parses the required configuration variables. Throws an error if the validations aren't met
