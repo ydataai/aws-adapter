@@ -50,16 +50,16 @@ func (r RESTController) usageEvent() gin.HandlerFunc {
 			return
 		}
 
-		r.logger.Infof("got event %+v", event)
+		r.logger.Infof("will create new usage event %+v", event)
 
 		response, err := r.meteringClient.CreateUsageEvent(tCtx, event)
 		if err != nil {
-			r.logger.Errorf("failed with error %v", err)
+			r.logger.Errorf("failed to create event %+v with error %v", event, err)
 			ctx.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 			return
 		}
 
-		r.logger.Infof("got response %+v", response)
+		r.logger.Infof("did create new usage event %+v with response:\n%+v", event, response)
 
 		ctx.JSON(http.StatusOK, response)
 	}

@@ -5,6 +5,7 @@
 package mock
 
 import (
+	"context"
 	"reflect"
 
 	"github.com/golang/mock/gomock"
@@ -34,16 +35,16 @@ func (m *MockServiceQuotaClientInterface) EXPECT() *MockServiceQuotaClientInterf
 }
 
 // GetAvailableGPUInstances mocks base method.
-func (m *MockServiceQuotaClientInterface) GetAvailableQuota(arg0, arg1 string) (float64, error) {
+func (m *MockServiceQuotaClientInterface) GetAvailableQuota(ctx context.Context, arg0, arg1 string) (float64, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetAvailableGPUInstances", arg0, arg1)
+	ret := m.ctrl.Call(m, "GetAvailableGPUInstances", ctx, arg0, arg1)
 	ret0, _ := ret[0].(float64)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetAvailableGPUInstances indicates an expected call of GetAvailableGPUInstances.
-func (mr *MockServiceQuotaClientInterfaceMockRecorder) GetAvailableQuota(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockServiceQuotaClientInterfaceMockRecorder) GetAvailableQuota(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAvailableGPUInstances", reflect.TypeOf((*MockServiceQuotaClientInterface)(nil).GetAvailableQuota), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAvailableGPUInstances", reflect.TypeOf((*MockServiceQuotaClientInterface)(nil).GetAvailableQuota), arg0, arg1, arg2)
 }
