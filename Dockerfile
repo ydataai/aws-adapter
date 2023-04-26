@@ -15,7 +15,8 @@ RUN go mod download
 RUN go build -a -o main "./cmd/${COMPILE_CMD}"
 
 # Use distroless as minimal base image to package the manager binary
-FROM gcr.io/distroless/base:latest-amd64
+FROM gcr.io/distroless/static-debian11:nonroot
+
 WORKDIR /
 
 LABEL org.opencontainers.image.source https://github.com/ydataai/aws-adapter
