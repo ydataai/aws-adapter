@@ -19,6 +19,9 @@ env:
   DOCKER_REPOSITORY: aws-adapter
   CONTAINER: aws-adapter-container-image
 
+  DOCKERHUB_REGISTRY: ydata
+  DOCKER_REPOSITORY_PREFIX: aws-adapter
+
   AWS_S3_REGION: ${{ secrets.AWS_S3_REGION }}
   SBOM_FILENAME: docker-sbom
   NOTION_DATABASE_ID: ${{ secrets.NOTION_REPOS_DATABASE_ID }}
@@ -149,6 +152,19 @@ jobs:
         docker tag ${{ steps.docker_build.outputs.imageId }} ${{ env.DOCKER_IMAGE_TAG }}
         docker push ${{ env.DOCKER_IMAGE_TAG }}
 
+    - name: Login to Dockerhub Registry
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+    - name: Push Docker Image
+      env:
+        DOCKER_IMAGE_TAG: ${{ env.DOCKERHUB_REGISTRY }}/${{ env.DOCKER_REPOSITORY_PREFIX }}-${{ matrix.package }}:${{ needs.prepare.outputs.version }}
+      run: |
+        docker tag ${{ steps.docker_build.outputs.imageId }} ${{ env.DOCKER_IMAGE_TAG }}
+        docker push ${{ env.DOCKER_IMAGE_TAG }}
+
 
   update-manifests:
     name: Update Manifests
@@ -183,6 +199,25 @@ jobs:
       run: |
         cd ${COMPONENT_PATH}
         kustomize edit set image ${CONTAINER_PKG}=${DOCKER_IMAGE_TAG}
+
+    - name: setup-yq
+      uses: chrisdickinson/setup-yq@v1.0.0
+
+    - name: Change cronjob on metering
+      if: matrix.package == 'metering'
+      env:
+        DOCKER_IMAGE_TAG: ${{ env.DOCKERHUB_REGISTRY }}/${{ env.DOCKER_REPOSITORY_PREFIX }}-${{ matrix.package }}:${{ needs.prepare.outputs.version }}
+      run: |
+        cd ${COMPONENT_PATH}
+        yq w -i metering-adapter/base/cronjob.yaml 'spec.jobTemplate.spec.template.spec.containers[0].image' ${DOCKER_IMAGE_TAG}
+
+    - name: Change deployment on quota
+      if: matrix.package == 'quota'
+      env:
+        DOCKER_IMAGE_TAG: ${{ env.DOCKERHUB_REGISTRY }}/${{ env.DOCKER_REPOSITORY_PREFIX }}-${{ matrix.package }}:${{ needs.prepare.outputs.version }}
+      run: |
+        cd ${COMPONENT_PATH}
+        yq w -i quota-adapter/base/deployment.yaml 'spec.template.spec.containers[0].image' ${DOCKER_IMAGE_TAG}
 
     - name: Commit and push image update into manifests repo
       env:
