@@ -211,7 +211,6 @@ jobs:
         cd ${COMPONENT_PATH}
         yq w -i metering-adapter/base/cronjob.yaml 'spec.jobTemplate.spec.template.spec.containers[0].image' ${DOCKER_IMAGE_TAG}
 
-
     - name: Change deployment on quota
       if: matrix.package == 'quota'
       env:
