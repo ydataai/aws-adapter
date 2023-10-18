@@ -202,6 +202,8 @@ jobs:
 
     - name: setup-yq
       uses: chrisdickinson/setup-yq@v1.0.0
+      env:
+        ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
 
     - name: Change cronjob on metering
       if: matrix.package == 'metering'
