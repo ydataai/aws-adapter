@@ -207,7 +207,7 @@ jobs:
       if: matrix.package == 'metering'
       env:
         DOCKER_IMAGE_TAG: ${{ env.DOCKERHUB_REGISTRY }}/${{ env.DOCKER_REPOSITORY_PREFIX }}-${{ matrix.package }}:${{ needs.prepare.outputs.version }}
-      run:|
+      run: |
         cd ${COMPONENT_PATH}
         yq w -i metering-adapter/base/cronjob.yaml 'spec.jobTemplate.spec.template.spec.containers[0].image' ${DOCKER_IMAGE_TAG}
 
@@ -215,7 +215,7 @@ jobs:
       if: matrix.package == 'quota'
       env:
         DOCKER_IMAGE_TAG: ${{ env.DOCKERHUB_REGISTRY }}/${{ env.DOCKER_REPOSITORY_PREFIX }}-${{ matrix.package }}:${{ needs.prepare.outputs.version }}
-      run:|
+      run: |
         cd ${COMPONENT_PATH}
         yq w -i quota-adapter/base/deployment.yaml 'spec.template.spec.containers[0].image' ${DOCKER_IMAGE_TAG}
 
