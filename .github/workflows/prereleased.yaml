@@ -201,7 +201,7 @@ jobs:
         kustomize edit set image ${CONTAINER_PKG}=${DOCKER_IMAGE_TAG}
 
     - name: setup-yq
-      uses: chrisdickinson/setup-yq@v1.0.1
+      uses: chrisdickinson/setup-yq@v1.0.0
       env:
         ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
 
