@@ -3,7 +3,7 @@ module github.com/ydataai/aws-adapter
 go 1.21
 
 require (
-	github.com/aws/aws-sdk-go v1.47.0
+	github.com/aws/aws-sdk-go v1.47.1
 	github.com/gin-gonic/gin v1.9.1
 	github.com/golang/mock v1.6.0
 	github.com/google/go-cmp v0.6.0
@@ -33,10 +33,10 @@ require (
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.11 // indirect
 	golang.org/x/arch v0.3.0 // indirect
-	golang.org/x/crypto v0.9.0 // indirect
-	golang.org/x/net v0.10.0 // indirect
-	golang.org/x/sys v0.8.0 // indirect
-	golang.org/x/text v0.9.0 // indirect
+	golang.org/x/crypto v0.14.0 // indirect
+	golang.org/x/net v0.17.0 // indirect
+	golang.org/x/sys v0.13.0 // indirect
+	golang.org/x/text v0.13.0 // indirect
 	google.golang.org/protobuf v1.30.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
