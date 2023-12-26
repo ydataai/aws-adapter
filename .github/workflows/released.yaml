@@ -43,9 +43,7 @@ jobs:
 
   prepare:
     name: Prepare
-    runs-on:
-    - self-hosted
-    - small
+    runs-on: ubuntu-22.04
 
     needs:
     - cancel_previous
