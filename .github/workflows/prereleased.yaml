@@ -91,11 +91,13 @@ jobs:
         load: true
         tags: ${{ env.DOCKER_IMAGE_TAG }}
 
-    - name: Create SBOM
+    - name: Create Docker SBOM
       uses: anchore/sbom-action@v0
       with:
         upload-artifact-retention: 1
+        image: ${{ steps.docker_build.outputs.imageId }}
         format: cyclonedx-json
+        upload-release-assets: false
         output-file: ${{ env.SBOM_FILENAME }}.cyclonedx.json
 
     - name: Configure AWS credentials
