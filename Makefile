@@ -23,6 +23,9 @@ quota:	### Run main package
 test: ### Runs application's tests in verbose mode
 	go test -v -cover ./...
 
+tidy: ### Runs go mod tidy to add missing and remove unused modules
+	go mod tidy
+
 mock:
 	@ rm mock/*.go || true && \
 		$(GOPATH)/bin/mockgen -source=pkg/service/rest_service.go -destination=mock/rest_service_mock.go -package=mock && \
