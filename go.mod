@@ -2,7 +2,7 @@ module github.com/ydataai/aws-adapter
 
 go 1.22
 
-toolchain go1.22.1
+toolchain go1.22.4
 
 require (
 	github.com/aws/aws-sdk-go v1.51.5
